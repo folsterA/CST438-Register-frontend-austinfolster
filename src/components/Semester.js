@@ -7,19 +7,55 @@ import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import {DataGrid} from '@mui/x-data-grid';
 import {SEMESTER_LIST} from '../constants.js'
+import AddStudent from './AddStudent.js';
+import { ButtonGroup } from '@mui/material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Cookies from 'js-cookie';
+import {SERVER_URL} from '../constants.js'
 
 // user selects from a list of  (year, semester) values
 class Semester extends Component {
-    constructor(props) {
-      super(props);
-      this.state = {selected: SEMESTER_LIST.length-1 };
-    }
+  constructor(props) {
+    super(props);
+    this.state = {selected: SEMESTER_LIST.length-1 };
+  }
  
-   onRadioClick = (event) => {
+  onRadioClick = (event) => {
     console.log("Semester.onRadioClick "+JSON.stringify(event.target.value));
     this.setState({selected: event.target.value});
   }
   
+  addStudent = (student) => {
+    console.log(JSON.stringify(student));
+    const token = Cookies.get('XSRF-TOKEN');
+ 
+    fetch(`${SERVER_URL}addStudent`,
+      { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json',
+                   'X-XSRF-TOKEN': token  }, 
+        body: JSON.stringify(student)
+      })
+    .then(res => {
+        if (res.ok) {
+          toast.success("Student successfully added", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+        } else {
+          toast.error("Error when adding", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+          console.error('Post http status =' + res.status);
+        }})
+    .catch(err => {
+      toast.error("Error when adding", {
+            position: toast.POSITION.BOTTOM_LEFT
+        });
+        console.error(err);
+    })
+  }
+
   render() {    
       const icolumns = [
       {
@@ -29,7 +65,7 @@ class Semester extends Component {
         renderCell: (params) => (
           <div>
             <Radio
-              checked={params.row.id == this.state.selected}
+              checked={params.row.id === this.state.selected}
               onChange={this.onRadioClick}
               value={params.row.id}
               color="default"
@@ -52,16 +88,20 @@ class Semester extends Component {
             </Toolbar>
          </AppBar>
          <div align="left" >
-              <div style={{ height: 400, width: '100%', align:"left"   }}>
-                <DataGrid   rows={SEMESTER_LIST} columns={icolumns} />
-              </div>                
-              <Button component={Link} 
-                      to={{pathname:'/schedule' , 
-                      year:SEMESTER_LIST[this.state.selected].year, 
-                      semester:SEMESTER_LIST[this.state.selected].name}} 
-                variant="outlined" color="primary" style={{margin: 10}}>
-                Get Schedule
-              </Button>
+            <div style={{ height: 400, width: '100%', align:"left"   }}>
+              <DataGrid   rows={SEMESTER_LIST} columns={icolumns} />
+            </div>
+            <ButtonGroup>     
+                <Button component={Link} 
+                        to={{pathname:'/schedule' , 
+                        year:SEMESTER_LIST[this.state.selected].year, 
+                        semester:SEMESTER_LIST[this.state.selected].name}} 
+                  variant="outlined" color="primary" style={{margin: 10}}>
+                  Get Schedule
+                </Button>
+                <AddStudent addStudent={this.addStudent}  />
+            </ButtonGroup>
+            <ToastContainer autoClose={1500} />  
           </div>
       </div>
     )

@@ -123,7 +123,7 @@ class SchedList extends Component {
         });
         console.error(err);
     })
-  } 
+  }
 
   render() {
      const columns = [
@@ -168,9 +168,9 @@ class SchedList extends Component {
             </div>
             <Grid container>
               <Grid item>
-			    <ButtonGroup>
-                  <AddCourse addCourse={this.addCourse}  />
-				</ButtonGroup>
+                <ButtonGroup>
+                        <AddCourse addCourse={this.addCourse}  />
+                </ButtonGroup>
               </Grid>
             </Grid>
             <div style={{ height: 400, width: '100%' }}>
